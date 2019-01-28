@@ -54,72 +54,6 @@ prompt_context() {
   fi
 }
 
-prompt_git() {
-  local color ref
-  is_dirty() {
-    test -n "$(git status --porcelain --ignore-submodules)"
-  }
-  ref="$vcs_info_msg_0_"
-  if [[ -n "$ref" ]]; then
-    if is_dirty; then
-      color=yellow
-      ref="${ref} $PLUSMINUS"
-    else
-      color=green
-      ref="${ref} "
-    fi
-    if [[ "${ref/.../}" == "$ref" ]]; then
-      ref="$BRANCH $ref"
-    else
-      ref="$DETACHED ${ref/.../}"
-    fi
-    prompt_segment $color $PRIMARY_FG
-    print -n " $ref"
-  fi
-}
-
-# Git: branch/detached head, dirty status
-prompt_git() {
-  (( $+commands[git] )) || return
-  local PL_BRANCH_CHAR
-  () {
-    local LC_ALL="" LC_CTYPE="en_US.UTF-8"
-    PL_BRANCH_CHAR=$'\ue0a0'         # 
-  }
-  local ref dirty mode repo_path
-  repo_path=$(git rev-parse --git-dir 2>/dev/null)
-
-  if $(git rev-parse --is-inside-work-tree >/dev/null 2>&1); then
-    # dirty=$(parse_git_dirty)
-    ref=$(git symbolic-ref HEAD 2> /dev/null) || ref="➦ $(git rev-parse --short HEAD 2> /dev/null)"
-    #if [[ -n $dirty ]]; then
-      prompt_segment 'NONE' yellow 
-    #else
-    #  prompt_segment 'NONE' green 
-    #fi
-
-    if [[ -e "${repo_path}/BISECT_LOG" ]]; then
-      mode=" <B>"
-    elif [[ -e "${repo_path}/MERGE_HEAD" ]]; then
-      mode=" >M<"
-    elif [[ -e "${repo_path}/rebase" || -e "${repo_path}/rebase-apply" || -e "${repo_path}/rebase-merge" || -e "${repo_path}/../.dotest" ]]; then
-      mode=" >R>"
-    fi
-
-    setopt promptsubst
-    autoload -Uz vcs_info
-
-    zstyle ':vcs_info:*' enable git
-    zstyle ':vcs_info:*' get-revision true
-    zstyle ':vcs_info:*' check-for-changes true
-    zstyle ':vcs_info:*' stagedstr '✚'
-    zstyle ':vcs_info:*' unstagedstr '●'
-    zstyle ':vcs_info:*' formats ' %u%c'
-    zstyle ':vcs_info:*' actionformats ' %u%c'
-    echo -n "${ref/refs\/heads\//$PL_BRANCH_CHAR } ${vcs_info_msg_0_%% }${mode}"
-  fi
-}
-
 prompt_kube() {
   prompt_segment 'NONE' green '☁️  '
   echo -n "$(kubectl config current-context)"
@@ -230,13 +164,13 @@ prompt_indicator() {
   prompt_date
   echo -n "%{%k%F{red}%}$"
 }
-prompt_git2() {
- echo " ${git_info:+${(e)git_info[prompt]}}"
+
+prompt_git() {
+  echo -n " %f${git_info:+${(e)git_info[prompt]}}"
 }
 
 ## Main prompt
 build_prompt() {
-  RETVAL=$?
   if [[ "${FULL_PROMPT}" -ne "1" ]]; then
     prompt_indicator
     prompt_end 
@@ -246,7 +180,7 @@ build_prompt() {
   prompt_virtualenv
   prompt_context
   prompt_dir
-  prompt_git2
+  prompt_git
   [[ "${kube_prompt}" -eq "1" ]] && prompt_kube
   prompt_bzr
   prompt_hg
@@ -280,7 +214,7 @@ prompt_zimple_setup() {
 
   # Set git-info parameters.
   zstyle ':prezto:module:git:info' verbose 'yes'
-  zstyle ':prezto:module:git:info:branch' format '%F{blue}%b%f'
+  zstyle ':prezto:module:git:info:branch' format '%F{green}%b%f'
   zstyle ':prezto:module:git:info:dirty' format '%%B%F{red} ±%f%%b'
   zstyle ':prezto:module:git:info:keys' format 'prompt' '(%b%D)'
 
