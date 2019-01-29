@@ -171,13 +171,13 @@ build_prompt() {
     exit 0
   fi
   prompt_status
-  prompt_virtualenv
-  prompt_context
+  #prompt_virtualenv
+  #prompt_context
   prompt_dir
   prompt_git
   [[ "${kube_prompt}" -eq "1" ]] && prompt_kube
-  prompt_bzr
-  prompt_hg
+  #prompt_bzr
+  #prompt_hg
 	prompt_newline
   prompt_indicator
   prompt_end
