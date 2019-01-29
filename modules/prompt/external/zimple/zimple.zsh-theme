@@ -147,13 +147,7 @@ prompt_newline() {
 # - am I root
 # - are there background jobs?
 prompt_status() {
-  local symbols
-  symbols=()
-  [[ $RETVAL -ne 0 ]] && symbols+="%{%F{red}%}✘"
-  [[ $UID -eq 0 ]] && symbols+="%{%F{yellow}%}⚡"
-  [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{cyan}%}⚙"
-
-  [[ -n "$symbols" ]] && prompt_segment 'NONE' default "$symbols"
+  echo -n "%(?.%F{green}${1:-☻}%f.%F{red}${1:-☻}%f)"
 }
 
 prompt_date() {
