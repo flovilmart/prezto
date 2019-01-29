@@ -15,8 +15,7 @@ precmd_track() {
   fi;
   preexec_done=0;
 }
-preexec_functions=(preexec_track)
-precmd_functions=(precmd_track)
+
 # Begin a segment
 # Takes two arguments, background and foreground. Both can be omitted,
 # rendering default background/foreground.
@@ -33,17 +32,6 @@ prompt_segment() {
   [[ -n $3 ]] && echo -n $3
 }
 
-# End the prompt, closing any open segments
-prompt_end() {
-  if [[ -n $CURRENT_BG ]]; then
-    echo -n "%{%k%F{$CURRENT_BG}%}"
-  else
-    echo -n "%{%k%}"
-  fi
-  echo -n "%{%f%}"
-  CURRENT_BG=''
-}
-
 ### Prompt components
 # Each component will draw itself, and hide itself if no information needs to be shown
 
@@ -52,11 +40,6 @@ prompt_context() {
   if [[ "$USER" != "$DEFAULT_USER" || -n "$SSH_CLIENT" ]]; then
     prompt_segment 'NONE' default "%(!.%{%F{yellow}%}.)$USER@%m"
   fi
-}
-
-prompt_kube() {
-  prompt_segment 'NONE' green '☁️  '
-  echo -n "$(kubectl config current-context)"
 }
 
 prompt_bzr() {
@@ -119,7 +102,7 @@ prompt_hg() {
 
 # Dir: current working directory
 prompt_dir() {
-  prompt_segment 'NONE' blue '%~'
+  print -n " %{%k%F{blue}%}%~%f"
 }
 
 # Virtualenv: current working virtualenv
@@ -131,15 +114,8 @@ prompt_virtualenv() {
 }
 
 prompt_newline() {
-  if [[ -n $CURRENT_BG ]]; then
-    echo -n "%{%k%F{$CURRENT_BG}%}
+  print -n "
 "
-  else
-    echo -n "%{%k%}"
-  fi
-
-  echo -n "%{%f%}"
-  CURRENT_BG=''
 }
 
 # Status:
@@ -147,46 +123,50 @@ prompt_newline() {
 # - am I root
 # - are there background jobs?
 prompt_status() {
-  echo -n "%(?.%F{green}${1:-☻}%f.%F{red}${1:-☻}%f)"
-}
-
-prompt_date() {
-  echo -n "$(date +%H:%M) "
+  print -n "%(?.%F{green}${1:-☻}%f.%F{red}${1:-☻}%f)"
 }
 
 prompt_indicator() {
-  prompt_date
-  echo -n "%{%k%F{red}%}$"
+  print -n "$(date +%H:%M) %{%k%F{red}%}$%f"
 }
 
 prompt_git() {
-  echo -n " %f${git_info:+${(e)git_info[prompt]}}"
+  print -n " %f${git_info:+${(e)git_info[prompt]}}"
 }
 
+prompt_k8s() {
+  print -n " %f${k8s_info:+${(e)k8s_info[prompt]}}"
+}
 ## Main prompt
 build_prompt() {
   if [[ "${FULL_PROMPT}" -ne "1" ]]; then
     prompt_indicator
-    prompt_end 
-    exit 0
+    return;
   fi
   prompt_status
   #prompt_virtualenv
   #prompt_context
   prompt_dir
   prompt_git
-  [[ "${kube_prompt}" -eq "1" ]] && prompt_kube
+  prompt_k8s
   #prompt_bzr
   #prompt_hg
-	prompt_newline
+  prompt_newline
   prompt_indicator
-  prompt_end
 }
 
 prompt_zimple_precmd() {
+  # Not rendering a full prompt, no need to update git status
+  test "${FULL_PROMPT}" -ne "1" && return;
+  
   # Get Git repository information.
   if (( $+functions[git-info] )); then
     git-info
+  fi
+  
+  # Get k8s repository information.
+  if (( $+functions[k8s-info] )); then
+    k8s-info
   fi
 }
 
@@ -195,7 +175,9 @@ prompt_zimple_setup() {
   prompt_opts=(cr percent sp subst)
 
   # Add hook for calling git-info before each command.
+  add-zsh-hook precmd precmd_track 
   add-zsh-hook precmd prompt_zimple_precmd
+  add-zsh-hook preexec preexec_track
 
   # Set editor-info parameters.
   zstyle ':prezto:module:editor:info:completing' format '%B%F{red}...%f%b'
@@ -211,6 +193,10 @@ prompt_zimple_setup() {
   zstyle ':prezto:module:git:info:branch' format '%F{green}%b%f'
   zstyle ':prezto:module:git:info:dirty' format '%%B%F{red} ±%f%%b'
   zstyle ':prezto:module:git:info:keys' format 'prompt' '(%b%D)'
+
+  zstyle ':prezto:module:k8s:info' enable 'yes'
+  zstyle ':prezto:module:k8s:info:context' format '%F{blue}%c%f'
+  zstyle ':prezto:module:k8s:info:keys' format 'prompt' '[☼ %c]'
 
   # Define prompts.
   PROMPT='$(build_prompt) '
