@@ -196,7 +196,7 @@ prompt_zimple_setup() {
 
   zstyle ':prezto:module:k8s:info' enable 'yes'
   zstyle ':prezto:module:k8s:info:context' format '%F{blue}%c%f'
-  zstyle ':prezto:module:k8s:info:keys' format 'prompt' '[☼ %c]'
+  zstyle ':prezto:module:k8s:info:keys' format 'prompt' '[⎈ %c]'
 
   # Define prompts.
   PROMPT='$(build_prompt) '
