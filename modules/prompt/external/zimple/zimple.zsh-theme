@@ -137,6 +137,10 @@ prompt_git() {
 prompt_k8s() {
   print -n " %f${k8s_info:+${(e)k8s_info[prompt]}}"
 }
+
+prompt_node() {
+  print -n " %f${n_info:+${(e)n_info[prompt]}}"
+}
 ## Main prompt
 build_prompt() {
   if [[ "${FULL_PROMPT}" -ne "1" ]]; then
@@ -147,6 +151,7 @@ build_prompt() {
   #prompt_virtualenv
   #prompt_context
   prompt_dir
+  prompt_node
   prompt_git
   prompt_k8s
   #prompt_bzr
@@ -167,6 +172,10 @@ prompt_zimple_precmd() {
   # Get k8s repository information.
   if (( $+functions[k8s-info] )); then
     k8s-info
+  fi
+  # Get n repository information.
+  if (( $+functions[n-info] )); then
+    n-info
   fi
 }
 
@@ -197,6 +206,10 @@ prompt_zimple_setup() {
   zstyle ':prezto:module:k8s:info' enable 'yes'
   zstyle ':prezto:module:k8s:info:context' format '%F{blue}%c%f'
   zstyle ':prezto:module:k8s:info:keys' format 'prompt' '[⎈ %c]'
+
+  zstyle ':prezto:module:n:info' enable 'yes'
+  zstyle ':prezto:module:n:info:version' format '%F{green}%c%f'
+  zstyle ':prezto:module:n:info:keys' format 'prompt' '[⬡ %c]'
 
   # Define prompts.
   PROMPT='$(build_prompt) '
