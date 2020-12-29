@@ -207,7 +207,7 @@ prompt_zimple_setup() {
   zstyle ':prezto:module:k8s:info:context' format '%F{blue}%c%f'
   zstyle ':prezto:module:k8s:info:keys' format 'prompt' '[⎈ %c]'
 
-  zstyle ':prezto:module:n:info' enable 'yes'
+  zstyle ':prezto:module:n:info' enable 'no'
   zstyle ':prezto:module:n:info:version' format '%F{green}%c%f'
   zstyle ':prezto:module:n:info:keys' format 'prompt' '[⬡ %c]'
 
