@@ -151,7 +151,7 @@ build_prompt() {
   #prompt_virtualenv
   #prompt_context
   prompt_dir
-  prompt_node
+  #prompt_node
   prompt_git
   prompt_k8s
   #prompt_bzr
@@ -174,9 +174,9 @@ prompt_zimple_precmd() {
     k8s-info
   fi
   # Get n repository information.
-  if (( $+functions[n-info] )); then
-    n-info
-  fi
+  # if (( $+functions[n-info] )); then
+  #   n-info
+  # fi
 }
 
 prompt_zimple_setup() {
