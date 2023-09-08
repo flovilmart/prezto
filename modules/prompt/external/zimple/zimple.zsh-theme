@@ -1,8 +1,8 @@
 # vim:ft=zsh ts=2 sw=2 sts=2
 
 CURRENT_BG='NONE'
-FULL_PROMPT='0';
-preexec_done=0;
+FULL_PROMPT='1';
+preexec_done=1;
 preexec_track() {
   preexec_done=1;
 }
@@ -163,12 +163,12 @@ build_prompt() {
 prompt_zimple_precmd() {
   # Not rendering a full prompt, no need to update git status
   test "${FULL_PROMPT}" -ne "1" && return;
-  
+
   # Get Git repository information.
   if (( $+functions[git-info] )); then
     git-info
   fi
-  
+
   # Get k8s repository information.
   if (( $+functions[k8s-info] )); then
     k8s-info
@@ -184,7 +184,7 @@ prompt_zimple_setup() {
   prompt_opts=(cr percent sp subst)
 
   # Add hook for calling git-info before each command.
-  add-zsh-hook precmd precmd_track 
+  add-zsh-hook precmd precmd_track
   add-zsh-hook precmd prompt_zimple_precmd
   add-zsh-hook preexec preexec_track
 
@@ -216,4 +216,3 @@ prompt_zimple_setup() {
 }
 
 prompt_zimple_setup "$@"
-
