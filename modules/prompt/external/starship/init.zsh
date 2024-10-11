@@ -4,6 +4,8 @@
 FULL_PROMPT='1';
 preexec_done=1;
 
+setopt promptsubst
+
 preexec_track() {
   preexec_done=1;
 }
@@ -19,21 +21,21 @@ precmd_track() {
 
 build_prompt() {
   if [[ "${FULL_PROMPT}" -ne "1" ]]; then
-    starship prompt --right
+    starship prompt --terminal-width="${COLUMNS}" --profile short
     return;
   fi
-  starship prompt
+  starship prompt --terminal-width="${COLUMNS}"
 }
 
 prompt_starship_setup() {
   unsetopt XTRACE KSH_ARRAYS
   prompt_opts=(cr percent sp subst)
 
-  # Add hook for calling git-info before each command.
   add-zsh-hook precmd precmd_track
   add-zsh-hook preexec preexec_track
 
   PROMPT='$(build_prompt)'
+  PROMPT2="$(starship prompt --continuation)"
 }
 
 prompt_starship_setup "$@"
